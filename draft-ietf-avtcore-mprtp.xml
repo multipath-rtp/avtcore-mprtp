@@ -98,7 +98,7 @@ they will automatically be output with "(if approved)" -->
           <code>02150</code>
           <country>Finland</country>
         </postal>
-        <email>varun@comnet.tkk.fi</email>
+        <email>varun.singh@iki.fi</email>
         <uri>http://www.netlab.tkk.fi/~varun/</uri>
       </address>
     </author>
@@ -1936,12 +1936,12 @@ type (PT) Registry:
   partially supported by the European Institute of Innovation and Technology
   (EIT) ICT Labs activity RCLD 11882.</t>
 
-<t>
-Lars Eggert has received funding from the European Union's Horizon 2020
-research and innovation program 2014-2018 under grant agreement No. 644866. This
-document reflects only the authors' views and the European Commission is not
-responsible for any use that may be made of the information it contains.
-</t>
+  <t>
+  Lars Eggert has received funding from the European Union's Horizon 2020
+  research and innovation program 2014-2018 under grant agreement No. 644866. This
+  document reflects only the authors' views and the European Commission is not
+  responsible for any use that may be made of the information it contains.
+  </t>
 
   <t>Thanks to
       Roni Even
