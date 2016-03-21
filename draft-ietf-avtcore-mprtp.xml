@@ -76,7 +76,7 @@ referenced. An alternate method (rfc include) is described in the references.
 <?rfc comments="yes"?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="exp" docName="draft-ietf-avtcore-mprtp-01" ipr='trust200902'>
+<rfc category="exp" docName="draft-ietf-avtcore-mprtp-02" ipr='trust200902'>
   <!-- category values: std, bcp, info, exp, and historic ipr
 values: full3667, noModification3667, noDerivatives3667 you can add the
 attributes updates="NNNN" and obsoletes="NNNN"
@@ -87,49 +87,48 @@ they will automatically be output with "(if approved)" -->
 
     <!-- add 'role="editor"' below for the editors if appropriate -->
 
-    <author fullname="Varun Singh" initials="V" surname="Singh">
-      <organization>Aalto University</organization>
+    <author fullname="Varun Singh" initials="V." surname="Singh">
+      <organization abbrev="callstats.io">Nemu Dialogue Systems Oy</organization>
       <address>
         <postal>
-          <street>School of Electrical Engineering</street>
-          <street>Otakaari 5 A</street>
-          <city>Espoo</city>
-          <region>FIN</region>
-          <code>02150</code>
+          <street>Runeberginkatu 4c A 4 </street>
+          <city>Helsinki</city>
+          <code>00100</code>
           <country>Finland</country>
         </postal>
-        <email>varun.singh@iki.fi</email>
-        <uri>http://www.netlab.tkk.fi/~varun/</uri>
+          <email>varun.singh@iki.fi</email>
+        <uri>http://www.callstats.io/</uri>
       </address>
     </author>
+
 
     <author fullname="Teemu Karkkainen" initials="T" surname="Karkkainen">
-      <organization>Aalto University</organization>
+      <organization>Technical University of Munich</organization>
       <address>
         <postal>
-          <street>School of Electrical Engineering</street>
-          <street>Otakaari 5 A</street>
-          <city>Espoo</city>
-          <region>FIN</region>
-          <code>02150</code>
-          <country>Finland</country>
+          <street>Faculty of Informatics</street>
+          <street>Boltzmannstrasse 3</street>
+          <city>Garching bei Muenchen</city>
+          <region>DE</region>
+          <code>85748</code>
+          <country>Germany</country>
         </postal>
-        <email>teemuk@comnet.tkk.fi</email>
+        <email>kaerkkae@in.tum.de</email>
       </address>
     </author>
 
-    <author fullname="Joerg Ott" initials="J" surname="Ott">
-      <organization>Aalto University</organization>
+    <author initials="J." surname="Ott" fullname="Joerg Ott">
+      <organization>Technical University of Munich</organization>
       <address>
         <postal>
-          <street>School of Electrical Engineering</street>
-          <street>Otakaari 5 A</street>
-          <city>Espoo</city>
-          <region>FIN</region>
-          <code>02150</code>
-          <country>Finland</country>
+          <street>Faculty of Informatics</street>
+          <street>Boltzmannstrasse 3</street>
+          <city>Garching bei Muenchen</city>
+          <region>DE</region>
+          <code>85748</code>
+          <country>Germany</country>
         </postal>
-        <email>jo@comnet.tkk.fi</email>
+        <email>ott@in.tum.de</email>
       </address>
     </author>
 
@@ -2035,6 +2034,12 @@ type (PT) Registry:
     <section anchor="App-a" title="Change Log">
         <t>Note to the RFC-Editor: please remove this section prior to
         publication as an RFC.</t>
+        <section title="Changes in draft-ietf-avtcore-mprtp-01, and -02">
+            <t><list style="symbols">
+                <t>Keep-alive versions, document needs review.</t>
+                <t>Updated authors' affiliations.</t>
+            </list></t>
+        </section>
         <section title="Changes in draft-ietf-avtcore-mprtp-00">
             <t><list style="symbols">
                 <t>Submitted as a WG item.</t>
