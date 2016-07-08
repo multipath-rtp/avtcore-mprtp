@@ -61,6 +61,8 @@ referenced. An alternate method (rfc include) is described in the references.
 "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5234.xml">
 <!ENTITY rfc5761 PUBLIC ""
 "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5761.xml">
+<!ENTITY rfc7656 PUBLIC ""
+"http://xml.resource.org/public/rfc/bibxml/reference.RFC.7656.xml">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <?rfc strict="yes" ?>
@@ -76,7 +78,7 @@ referenced. An alternate method (rfc include) is described in the references.
 <?rfc comments="yes"?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="exp" docName="draft-ietf-avtcore-mprtp-02" ipr='trust200902'>
+<rfc category="exp" docName="draft-ietf-avtcore-mprtp-03" ipr='trust200902'>
   <!-- category values: std, bcp, info, exp, and historic ipr
 values: full3667, noModification3667, noDerivatives3667 you can add the
 attributes updates="NNNN" and obsoletes="NNNN"
@@ -205,12 +207,14 @@ Group</workgroup> -->
     and reliability that can be achieved by pooling their respective
     capacities.</t>
 
-    <t>Multipath RTP (MPRTP) is an OPTIONAL extension to <xref
-    target="RFC3550">RTP</xref> that allows splitting a single RTP stream into
-    multiple subflows that are transmitted over different paths. In effect,
-    this pools the resource capacity of multiple paths. Multipath RTCP
-    (MPRTCP) is an extension to RTCP, it is used along with MPRTP to report
-    per-path sender and receiver characteristics.</t>
+    <t>Multipath RTP (MPRTP) is an extension to <xref target="RFC3550">RTP</xref>
+    which splits a single <xref target="RFC7656">RTP Stream</xref> (At any given
+    point in time, an RTP stream can have one and only one SSRC)  into
+    multiple subflows that are transmitted over different network interfaces paths
+    (i.e., 2- out of the 5-tuples are different). In effect, this pools the
+    resource capacity of multiple paths. Multipath RTCP (MPRTCP) is an extension
+    to RTCP, it is used along with MPRTP to report sender and receiver
+    characteristics for each subflow.</t>
 
     <t>Other IETF transport protocols that are capable of using multiple
     paths include <xref target="RFC4960">SCTP</xref>, <xref
@@ -227,22 +231,60 @@ Group</workgroup> -->
 
       <section title="Terminology">
         <t><list style="symbols">
-            <t>Endpoint: host either initiating or terminating an RTP
-            flow.</t>
+            <t>Endpoint: corresponds to a single host either initiating or
+            terminating a <xref target="RFC7656">communication session
+            </xref>.</t>
 
             <t>Interface: logical or physical component that is capable of
             acquiring a unique IP address.</t>
 
             <t>Path: sequence of links between a sender and a receiver.
-            Typically, defined by a set of source and destination
-            addresses.</t>
+              Typically, defined by a set of source and destination
+              addresses. In the context of <xref target="RFC7656">RTP
+              taxonomy</xref> it best matches a media transports.</t>
 
-            <t>Subflow: flow of RTP packets along a specific path, i.e., a
+              <!-- VS: confirm the taxonomy -->
+
+            <t>Multipath RTP Stream: An RTP Stream that makes use of one or more
+              paths, i.e., simultaneously makes use of multiple media
+              transports to send and receive from a particular RTP Stream.
+              In cases, where a single path is available, an MPRTP Stream will
+              appear to be an RTP Stream.
+            </t>
+
+
+            <t>MPRTP Subflow: The RTP packets from a single RTP Stream that are
+              sent or received over a particular media transport are identified
+              as a subflow. Therefore, an MPRTP Stream has several subflows,
+              each subflow is associated to a particular media transport.</t>
+
+              <!-- Each subflow has a distinct subflow identifier, and their
+              own subflow sequence numbers. -->
+
+            <t>Subflow Identifier: within a communication session, the subflow
+              identifier denotes the RTP packets belonging to a RTP Stream sent
+              over a particular media transport. There are two design choices:
+
+              <list style="symbols">
+                <t>Each media transport at an endpoint chooses a unique
+                  identifier for itself, and the Subflow RTP Streams use the
+                  chosen identifier.</t>
+                <t>The RTP Stream chooses distinct identifiers for each
+                  Subflow RTP stream </t>
+              </list>
+            </t>
+
+
+
+              <!-- An RTP Stream is split into multiple subflows, each
+              subflow is then sent over different media transports, i.e.,
+
+              flow of RTP packets along a specific path, i.e., a
             subset of the packets belonging to an RTP stream. The combination
             of all RTP subflows forms the complete RTP stream. Typically, a
             subflow would map to a unique path, i.e., each combination of IP
             addresses and port pairs (5-tuple, including protocol) is a unique
-            subflow.</t>
+            subflow. -->
 
           </list></t>
       </section>
@@ -255,8 +297,8 @@ Group</workgroup> -->
       Such endpoints could be residential IPTV devices that connect to the
       Internet through two different Internet service providers (ISPs), or
       mobile devices that connect to the Internet through 3G and WLAN
-      interfaces. By allowing RTP to use multiple paths for transmission, the
-      following gains can be achieved:
+      interfaces. By allowing a single RTP Stream to use multiple paths for
+      transmission, the following gains can be achieved:
 
       <list style="symbols">
         <t>Higher quality: Pooling the resource capacity of multiple Internet
@@ -264,13 +306,14 @@ Group</workgroup> -->
         From the application perspective, the available bandwidth between the
         two endpoints increases.</t>
 
-        <t>Load balancing: Transmitting an RTP stream over multiple paths
-        reduces the bandwidth usage on a single path, which in turn reduces
-        the impact of the media stream on other traffic on that path.</t>
+        <t>Load balancing: Transmitting a single RTP stream (or several
+          RTP streams) over multiple paths reduces the bandwidth usage on
+          each path, which in turn reduces the impact of the media stream(s)
+          on other traffic on those paths.</t>
 
         <t>Fault tolerance: When multiple paths are used in conjunction with
         redundancy mechanisms (FEC, re-transmissions, etc.), outages on one
-        path have less impact on the overall perceived quality of the
+        path have less impact on the overall perceived quality of the media
         stream.</t>
       </list>
       </t>
@@ -297,7 +340,7 @@ Group</workgroup> -->
       goals.</t>
 
       <section title="Functional goals">
-        <t>Allow unicast RTP session to be split into multiple subflows in
+        <t>Allow an unicast RTP Stream to be split into multiple subflows in
         order to be carried over multiple paths. This may prove beneficial in
         case of video streaming.
         <list style="symbols">
@@ -314,14 +357,14 @@ Group</workgroup> -->
             increase reliability.</t>
           </list>
           The protocol SHOULD be able to open new subflows for an existing
-          session when new paths appear and MUST be able to close subflows
-          when paths disappear.</t>
+          multimedia session when new paths appear and MUST be able to close
+          subflows when paths disappear.</t>
       </section>
 
       <section title="Compatibility goals">
-        <t>MPRTP MUST be backwards compatible; an MPRTP stream needs to fall
-        back to be compatible with legacy RTP stacks if MPRTP support is not
-        successfully negotiated.
+        <t>Multipath RTP (MPRTP) MUST be backwards compatible; an MPRTP Stream
+          needs to fall back to be compatible with legacy RTP stacks if MPRTP
+          support is not successfully negotiated.
         <list style="symbols">
             <t>Application Compatibility: MPRTP service model MUST be
             backwards compatible with existing RTP applications, i.e., an
@@ -331,12 +374,13 @@ Group</workgroup> -->
             that the application can configure any additional features
             provided by the MPRTP stack.</t>
 
-            <t>Network Compatibility: individual RTP subflows MUST themselves
-            be well-formed RTP flows, so that they are able to traverse NATs
-            and firewalls. This MUST be the case even when interfaces appear
-            after session initiation. <xref target="RFC5245">Interactive
-            Connectivity Establishment (ICE)</xref> MAY be used for
-            discovering new interfaces or performing connectivity checks.</t>
+            <t>Network Compatibility: individual MPRTP subflows MUST themselves
+              be flows of well-formed RTP packets, so that they are able to
+              traverse NATs and firewalls. This MUST be the case even when
+              interfaces appear after session initiation.
+              <xref target="RFC5245">Interactive Connectivity Establishment
+              (ICE)</xref> MAY be used for discovering new interfaces or
+              performing connectivity checks.</t>
           </list>
         </t>
       </section>
@@ -376,9 +420,9 @@ Teemu: Can we get rid of this? Especially the TCP stuff seems irrelevant.
     </section>
 
     <section title="MPRTP Architecture">
-      <t>In a typical scenario, an RTP session uses a single path. In an MPRTP
-      scenario, an RTP session uses multiple subflows that each use a
-      different path. <xref target="fig-mprtp-streaming" /> shows the
+      <t>In a typical scenario, an RTP Stream uses a single path. In an MPRTP
+      scenario, an RTP Stream uses multiple subflows, those subflows may
+      each use a different path. <xref target="fig-mprtp-streaming" /> shows the
       difference. </t>
 
 <!--      <section title="Operation overview"> -->
@@ -388,7 +432,7 @@ streaming and MPRTP">
 +--------------+                Signaling            +--------------+
 |              |------------------------------------>|              |
 |    Client    |<------------------------------------|    Server    |
-|              |           Single RTP flow           |              |
+|              |          Single RTP Stream          |              |
 +--------------+                                     +--------------+
 
 +--------------+              Signaling              +--------------+
@@ -405,9 +449,9 @@ streaming and MPRTP">
 +-----------------------+         +-------------------------------+
 |      Application      |         |          Application          |
 +-----------------------+         +-------------------------------+
-|                       |         |             MPRTP             |
+|                       |         |              RTP              |
 +          RTP          +         +- - - - - - - -+- - - - - - - -+
-|                       |         |  RTP subflow  |  RTP subflow  |
+|                       |         | MPRTP subflow | MPRTP subflow |
 +-----------------------+         +---------------+---------------+
 |          UDP          |         |      UDP      |      UDP      |
 +-----------------------+         +---------------+---------------+
@@ -417,11 +461,11 @@ streaming and MPRTP">
 </figure>
     <t><xref target="fig-mprtp-archit" /> illustrates the differences between
     the standard RTP stack and the MPRTP stack. MPRTP receives a normal RTP
-    session from the application and splits it into multiple RTP subflows.
+    Stream from the application and splits it into multiple RTP subflows.
     Each subflow is then sent along a different path to the receiver. To the
-    network, each subflow appears as an independent, well-formed RTP flow. At
-    the receiver, the subflows are combined to recreate the original RTP
-    session. The MPRTP layer performs the following functions:
+    network, each subflow appears as an independent flow of well-formed
+    RTP packets. At the receiver, the subflows are combined to recreate the
+    original RTP Stream. The MPRTP layer performs the following functions:
 
     <list style="symbols">
         <t>Path Management: The layer is aware of alternate paths to the other
@@ -446,13 +490,15 @@ streaming and MPRTP">
        Isn't the IP stack doing that? - Lars) -->
         </t>
 
-        <t>Packet Scheduling: the layer splits a single RTP flow into multiple
-        subflows and sends them across multiple interfaces (paths). The
-        splitting MAY BE done using different path characteristics.</t>
+        <t>Packet Scheduling: the layer splits a single RTP Stream into
+          multiple subflows and sends them across multiple interfaces
+          (paths). The splitting MAY BE done using different path
+          characteristics.</t>
 
-        <t>Subflow recombination: the layer creates the original stream by
-        recombining the independent subflows. Therefore, the multipath
-        subflows appear as a single RTP stream to applications.</t>
+        <t>Subflow recombination: the layer creates the original RTP
+          stream by recombining the independent subflows associated with
+          the RTP Stream. Therefore, the subflows are eventually presented
+          as a single RTP stream to the applications.</t>
     </list>
     </t>
 
@@ -475,8 +521,8 @@ streaming and MPRTP">
 <section title="Example Media Flow Diagrams">
     <t>There may be many complex technical scenarios for MPRTP, however, this
     memo only considers the following two scenarios: 1) a unidirectional media
-    flow that represents the streaming use-case, and 2) a bidirectional media
-    flow that represents a conversational use-case.</t>
+    stream that represents the streaming use-case, and 2) a bidirectional media
+    stream that represents a conversational use-case.</t>
 
     <section title="Streaming use-case">
     <t>In the unidirectional scenario, the receiver (client) initiates a
@@ -486,11 +532,11 @@ streaming and MPRTP">
     multiple interfaces. Host B performs connectivity checks on host A's
     multiple interfaces. If the interfaces are reachable, then host B streams
     multimedia data along multiple paths to host A. Moreover, host B also
-    sends RTCP Sender Reports (SR) for each subflow and host A responds with a
-    normal RTCP Receiver Report (RR) for the overall session as well as the
-    receiver statistics for each subflow. Host B distributes the packets
-    across the subflows based on the individually measured path
-    characteristics.</t>
+    Sends RTCP Sender Reports (SR) for the overall session and for each subflow
+    and host A responds with a normal RTCP Receiver Report (RR) for the overall
+    session as well as the receiver statistics for each subflow. Host B
+    distributes the packets across the subflows based on the individually measured
+    path characteristics.</t>
 
     <t>Alternatively, to reduce media startup time, host B may start streaming
     multimedia data to host A's initiating interface and then perform
@@ -577,26 +623,27 @@ endpoint's interfaces ahead of time].</t>
 then investigate each block and consider available mechanisms in the next
 section.
     <list style="numbers">
-        <t>Session Setup: Interfaces may appear or disappear at anytime during
-        the session. To preserve backward compatibility with legacy
-        applications, a multipath session MUST look like a bundle of
-        individual RTP sessions. A multipath session may be upgraded from a
-        typical single path session, as and when new interfaces appear or
-        disappear. However, it is also possible to setup a multipath session
-        from the beginning, if the interfaces are available at the start of
-        the multimedia session.</t>
+      <t>Session Setup: Interfaces may appear or disappear at anytime during
+        the communication session. To preserve backward compatibility with legacy
+        applications, a MPRTP session MUST look like a bundle of individual
+        RTP sessions. A MPRTP session may start using a single path, later start
+        using multiple paths as and when new interfaces appear or disappear.
+        However, it is also possible to setup a MPRTP session from the beginning,
+        if multiple interfaces are available at the start of the multimedia session.
+      </t>
 
-        <t>Expanding RTP: For a multipath session, each subflow MUST look like
-        an independent RTP flow, so that individual RTCP messages can be
-        generated per subflow. Furthermore, MPRTP splits the single multimedia
-        stream into multiple subflows based on path characteristics (e.g. RTT,
-        loss-rate, receiver rate, bandwidth-delay product etc.) and
-        dynamically adjusts the load on each link.</t>
+      <t>Expanding RTP: For a MPRTP Stream, each subflow MUST look like an
+        independent flow of RTP packets, so that individual RTCP messages can be
+        generated for each subflow. Consequently, MPRTP may split the RTP Stream
+        into multiple subflows based on path characteristics (e.g. RTT, fractional
+        losses, receiver rate, bandwidth-delay product, etc.), i.e.,
+        dynamically adjusts the load on each subflow.</t>
 
-        <t>Adding Interfaces: Interfaces on the host need to be regularly
-        discovered and advertised. This can be done at session setup and/or
-        during the session. Discovering interfaces is outside the scope of
-        this document.<!--When discovering and receiving new interfaces, the
+       <t>Adding Interfaces: Interfaces on the host need to be regularly
+        discovered and advertised. This can be done when the MPRTP session is set up
+        and/or during the communication session. Discovering interfaces is
+        outside the scope of this document.
+        <!--When discovering and receiving new interfaces, the
         MPRTP layer needs to select address and port pairs.--></t>
 
 <!--Ralf -03: An endpoint must be capable of advertising changes in its set of
@@ -611,7 +658,7 @@ disappearing. -->
 
         <t>Maintenance and Failure Handling: In a multi-homed endpoint
         interfaces may appear and disappear. If this occurs at the sender, it
-        has to re-adjust the load on the available links. On the other hand,
+        has to re-adjust the load on the available paths. On the other hand,
         if this occurs at the receiver, then the multimedia data transmitted
         by the sender to those interfaces is lost. This data may be
         re-transmitted along a different path i.e., to a different interface
@@ -630,6 +677,7 @@ disappearing. -->
 <section title="Available Mechanisms within the Functional Blocks">
 <t>This section discusses some of the possible alternatives for each
 functional block mentioned in the previous section.</t>
+
     <section title="Session Setup">
         <t>MPRTP session can be set up in many possible ways e.g., during
         handshake, or upgraded mid-session. The capability exchange may be
@@ -639,6 +687,8 @@ functional block mentioned in the previous section.</t>
         target="I-D.ietf-mmusic-rfc2326bis">Real-Time Streaming Protocol
         (RTSP)</xref>) or in-band signaling (e.g., RTP/RTCP header extension,
         Session Traversal Utilities for NAT (STUN) messages).</t>
+
+        <t>[Editor's Note: , with continuous ICE Nomination.]</t>
 
 <!--    <t><cref anchor="note-sip-mp" source="MMUSIC Review">Using SIP over
         SCTP, MPTCP instead of UDP/TCP are out of scope of the
@@ -666,7 +716,7 @@ functional block mentioned in the previous section.</t>
             advertisements may be done in-band using RTP/RTCP extensions. The
             endpoints perform connectivity checks (see <xref
             target="fig-mprtp-new-subflow" /> for more details).</t> -->
-            <t> Interfaces can appear and disappear during a session, the
+            <t> Interfaces can appear and disappear during a MPRTP session, the
             endpoint MUST be capable of advertising the changes in its set of
             usable interfaces. Additionally, the application or OS may define
             a policy on when and/or what interfaces are usable. However, MPRTP
@@ -681,7 +731,7 @@ functional block mentioned in the previous section.</t>
 
         <section title="In-band vs. Out-of-band Signaling">
 
-        <t> MTRTP nodes will generally use a signaling protocol to establish
+        <t> MPRTP nodes will generally use a signaling protocol to establish
         their MPRTP session. With the existence of such a signaling
         relationship, two alternatives become available to exchange
         information about the available interfaces on each side for extending
@@ -754,11 +804,11 @@ functional block mentioned in the previous section.</t>
         load balancing and fault tolerance decisions based on the
         characteristics of each path. Therefore, apart from normal RTP
         sequence numbers defined in <xref target="RFC3550" />, the MPRTP
-        sender MUST add subflow-specific sequence numbers to help calculate
-        fractional losses, jitter, RTT, playout time, etc., for each path, and
-        a subflow identifier to associate the characteristics with a path. The
-        RTP header extension for MPRTP is shown in
-        <xref target="sec-mprtp-pkt-format-hdrext" />. </t>
+        sender MUST add the following within the SSRC scope, subflow-specific
+        sequence numbers to help calculate fractional losses, jitter, RTT,
+        playout time, etc., for each subflow, and a subflow identifier to
+        associate the characteristics with a path. The RTP header extension
+        for MPRTP is shown in <xref target="sec-mprtp-pkt-format-hdrext" />. </t>
 
     </section>
 
@@ -797,7 +847,7 @@ regarding SIP/SDP transport.
         subflow.</t>
 
         <t>If an interface disappears, the endpoint MUST send an updated
-        interface advertisement without the interface and release the the
+        interface advertisement without the interface and release the
         associated subflows.</t>
     </section>
 </section>
@@ -935,11 +985,11 @@ Key:
         (in SDP) Interface Advertisement" anchor="sec-mprtp-subflow-advert">
 
         <t>If there is no media flowing at the moment and the application
-        wants to use the interfaces from the start of the session, it
-        should advertise them in SDP (See <xref
+        wants to use the interfaces from the start of the communication
+        session, it should advertise them in SDP (See <xref
         target="I-D.singh-mmusic-mprtp-sdp-extension" />). Alternatively,
-        the endpoint can setup the session as a single path media session
-        and upgrade the session to multipath by advertising the session
+        the endpoint can setup the session as a single path communication
+        session and upgrade the session to multipath by advertising the session
         in-band (See <xref target="sec-mprtp-rtcp-subflow-advert" /> or <xref
         target="I-D.wing-mmusic-ice-mobility" />).
         Moreover, if an interface appears and disappears, the endpoint
@@ -956,19 +1006,26 @@ Key:
         <section title="In-band Interface Advertisement"
         anchor="sec-mprtp-rtcp-subflow-advert">
 
-        <t>To advertise the multiple interfaces in RTCP, an MPRTP-capable
-        endpoint MUST add the MPRTP Interface Advertisement defined in <xref
-        target="fig-mp-rtcp-header-ia" /> with the RTCP Sender Report (SR).
-        Each unique address is encapsulated in an Interface Advertisement
-        block and contains the IP address, RTP and RTCP port addresses. The
+        <t> To advertise the multiple interfaces in RTCP, an MPRTP-capable
+        endpoint SHOULD add the MPRTP Interface Advertisement defined in <xref
+        target="fig-mp-rtcp-header-ia" /> with an RTCP Sender Report (SR) or
+        RTCP Receiver Report (RR). If reduced-size <xref target="RFC5506" />
+        RTCP is used, the interface advertisements can be sent separately
+        depending on the RTCP timing rules.</t>
+
+        <t> Each unique address is encapsulated in an Interface Advertisement
+        block and contains the IP address, RTP port addresses. The
         Interface Advertisement blocks are ordered based on a decreasing
         priority level. On receiving the MPRTP Interface Advertisement, an
         MPRTP-capable receiver MUST respond with the set of interfaces (subset
         or all available) it wants to use.</t>
 
         <t> If the sender and receiver have only one interface, then the
-        endpoints MUST indicate the negotiated single path IP, RTP port and
-        RTCP port addresses.</t>
+        endpoints MUST indicate the negotiated single path IP, RTP port
+        addresses.</t>
+
+        <t> [Editor: Do we still need this: could use passive/aggressive
+         nomination? or perform an ice restart?]</t>
         </section>
 
         <section title="Subflow ID Assignment"
@@ -1071,7 +1128,7 @@ Key:
         The scheduling strategy may either choose to augment the paths to
         create higher throughput or use the alternate paths for enhancing
         resilience or error-repair. Due to the changes in path
-        characteristics, the endpoint should be able change its scheduling
+        characteristics, the endpoint should be able to change its scheduling
         strategy during an ongoing session. The MPRTP sender MUST also
         populate the subflow specific fields described in the MPRTP extension
         header (see <xref target="sec-mprtp-pkt-format-hdrext-rtp" />).</t>
@@ -1115,8 +1172,9 @@ Key:
         <t> The aggregate RTCP report (i.e., the regularly scheduled RTCP
         report) MUST be sent compounded as described in <xref
         target="RFC5506" />, however, the subflow-specific RTCP reports MAY
-        be sent non-compounded. Further, each subflow and the aggregate RTCP
-        report MUST follow the timing rules defined in <xref target="RFC4585"/>.
+        be sent non-compounded (reduced-size). Further, each subflow and
+        the aggregate RTCP report MUST follow the timing rules defined
+        in <xref target="RFC4585"/>.
         </t>
 
 
@@ -1132,7 +1190,7 @@ Key:
 -->
 
         <t>The RTCP reporting interval is locally implemented and the
-        scheduling of the RTCP reports may depend on the the behavior of each
+        scheduling of the RTCP reports may depend on the behavior of each
         path. For instance, the RTCP interval may be different for a passive
         path than an active path to keep port bindings alive. Additionally, an
         endpoint may decide to share the RTCP reporting bit rate equally
@@ -1145,13 +1203,14 @@ Key:
       </section>
 
       <section title="RTCP Transmission" anchor="sec-mp-rtcp-pkt-trans">
-        <t> The sender sends an RTCP SR on each active path. For each SR the
-        receiver gets, it echoes one back to the same IP address-port pair
-        that sent the SR. The receiver tries to choose the symmetric path and
-        if the routing is symmetric then the per-path RTT calculations will
-        work out correctly. However, even if the paths are not symmetric, the
-        sender would at maximum, under-estimate the RTT of the path by a
-        factor of half of the actual path RTT.</t>
+        <t> The sender sends an RTCP Subflow SR (SSR) on each active path.
+          For each SR the receiver gets, it echoes one back to the same
+          IP address-port pair that sent the SR. The receiver tries to
+          choose the symmetric path and if the routing is symmetric then
+          the per-path RTT calculations will work out correctly. However,
+          even if the paths are not symmetric, the sender would at maximum,
+          under-estimate the RTT of the path by a factor of half of the
+          actual path RTT.</t>
       </section>
 
     </section>
@@ -1214,7 +1273,7 @@ MPRTP (H-Ext ID)">
 ]]></artwork>
     </figure></t></list>
             </t>
-            <t> length
+            <t> Length
                 <list style="empty"><t>The 4-bit length field is the length of
                 extension data in bytes not including the H-Ext ID and length
                 fields. The value zero indicates there is no data
@@ -1258,7 +1317,7 @@ MPRTP (H-Ext ID)">
                 <list style="empty"><t>Indicates that the MPRTP header
                 extension carries subflow specific information.</t></list>
             </t>
-            <t> length = 4</t>
+            <t>Length = 4</t>
             <t>Subflow ID: Identifier of the subflow. Every RTP packet
             belonging to the same subflow carries the same unique subflow
             identifier.</t>
@@ -1969,6 +2028,7 @@ type (PT) Registry:
       &rfc5506; <!-- non-compound -->
       &rfc4585; <!-- avpf -->
       &rfc5761; <!-- multiplexing -->
+      &rfc7656;
 
     </references>
 
@@ -2034,6 +2094,13 @@ type (PT) Registry:
     <section anchor="App-a" title="Change Log">
         <t>Note to the RFC-Editor: please remove this section prior to
         publication as an RFC.</t>
+        <section title="Changes in draft-ietf-avtcore-mprtp-03">
+            <t><list style="symbols">
+                <t>Incorporating review comments from Frederic Maze
+                  on incorporating new RTP Taxonomy.</t>
+            </list></t>
+        </section>
+
         <section title="Changes in draft-ietf-avtcore-mprtp-01, and -02">
             <t><list style="symbols">
                 <t>Keep-alive versions, document needs review.</t>
